@@ -37,7 +37,8 @@ class NotifyMailer < GovukNotifyRails::Mailer
   # Define methods as usual, and set the template and personalisation accordingly
   #
   def my_test_email(user)
-    set_template('uuid')
+    set_template_name('my-template-name') # OR
+    set_template('uuid') # It is preferred to use the template name and let this gem find its id
 
     # Optionally, you can set a reference and a reply_to
     # 

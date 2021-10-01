@@ -6,10 +6,12 @@ module GovukNotifyRails
     attr_accessor :govuk_notify_reference
     attr_accessor :govuk_notify_personalisation
     attr_accessor :govuk_notify_email_reply_to
+    attr_accessor :govuk_notify_template_name
 
     protected
 
     def mail(headers = {})
+      find_template if govuk_notify_template_name
       raise ArgumentError, 'Missing template ID. Make sure to use `set_template` before calling `mail`' if govuk_notify_template.nil?
 
       headers[:body] ||= _default_body
@@ -23,6 +25,10 @@ module GovukNotifyRails
 
     def set_template(template)
       self.govuk_notify_template = template
+    end
+
+    def set_template_name(template_name)
+      self.govuk_notify_template_name = template_name
     end
 
     def set_reference(reference)
@@ -39,6 +45,26 @@ module GovukNotifyRails
 
     def _default_body
       'This is a GOV.UK Notify email with template %s and personalisation: %s' % [govuk_notify_template, govuk_notify_personalisation]
+    end
+
+    private
+
+    def client
+      @client ||= ::Notifications::Client.new(govuk_notify_settings[:api_key], govuk_notify_settings[:base_url])
+    end
+
+    def find_template_id(name)
+      templates_collection = client.get_all_templates(type: :email)
+      template = templates_collection.collection.detect do |t|
+        t.name == name
+      end
+      raise "No template for reference: #{template_reference}" unless template.present?
+  
+      template.id
+    end
+
+    def find_template
+      set_template find_template_id(govuk_notify_template_name)
     end
   end
 end

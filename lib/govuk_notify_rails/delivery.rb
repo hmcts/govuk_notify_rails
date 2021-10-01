@@ -19,6 +19,10 @@ module GovukNotifyRails
       settings[:api_key]
     end
 
+    def base_url
+      settings[:base_url]
+    end
+
     def payload_for(message)
       {
         email_address: message.to.first,
@@ -30,7 +34,7 @@ module GovukNotifyRails
     end
 
     def notify_client
-      @notify_client ||= Notifications::Client.new(api_key)
+      @notify_client ||= Notifications::Client.new(api_key, base_url)
     end
   end
 end
